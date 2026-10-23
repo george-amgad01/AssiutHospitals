@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <poi id="hosp_001" type="hospital" x="4097.75" y="180.38" width="14" height="14" color="0.55,0.55,0.55" name="Abo Teeg Central Hospital"/>
+    <poi id="hosp_002" type="hospital" x="2755.46" y="2707.04" width="14" height="14" color="1,0,0" name="Al Mabara Hospital"/>
+    <poi id="hosp_003" type="hospital" x="1877.06" y="1299.64" width="14" height="14" color="1,0,0" name="Al Rowad"/>
+    <poi id="hosp_004" type="hospital" x="2541.96" y="1643.72" width="14" height="14" color="1,0,0" name="Arc Angle Mikhael Hospital"/>
+    <poi id="hosp_005" type="hospital" x="1396.53" y="2908.99" width="14" height="14" color="1,0,0" name="Asyout Hospital for Mental Health"/>
+    <poi id="hosp_006" type="hospital" x="1628.52" y="2962.35" width="14" height="14" color="1,0,0" name="Asyut Chest Hospital"/>
+    <poi id="hosp_007" type="hospital" x="599.53" y="1666.95" width="14" height="14" color="1,0,0" name="Asyut University Hospital"/>
+    <poi id="hosp_008" type="hospital" x="1977.66" y="2178.63" width="14" height="14" color="1,0,0" name="Dar El Shefaa Hospital"/>
+    <poi id="hosp_009" type="hospital" x="1848.26" y="2199.98" width="14" height="14" color="1,0,0" name="El Akaad Hospital"/>
+    <poi id="hosp_010" type="hospital" x="2117.95" y="1879.04" width="14" height="14" color="1,0,0" name="El Aksaa Hospital"/>
+    <poi id="hosp_011" type="hospital" x="1792.22" y="3050.49" width="14" height="14" color="1,0,0" name="El Fayrouz Hospital"/>
+    <poi id="hosp_012" type="hospital" x="1904.81" y="2410.59" width="14" height="14" color="1,0,0" name="El Hayah Hospital"/>
+    <poi id="hosp_013" type="hospital" x="2646.86" y="1306.21" width="14" height="14" color="1,0,0" name="El Nseem Dr.Trez Mansour Hospital"/>
+    <poi id="hosp_014" type="hospital" x="2055.74" y="2219.14" width="14" height="14" color="1,0,0" name="El Reda Hospital"/>
+    <poi id="hosp_015" type="hospital" x="1951.6" y="2426.57" width="14" height="14" color="1,0,0" name="El Safaa Hospital"/>
+    <poi id="hosp_016" type="hospital" x="2318.56" y="1447.19" width="14" height="14" color="1,0,0" name="El Salam Hospital"/>
+    <poi id="hosp_017" type="hospital" x="1792.22" y="3050.49" width="14" height="14" color="1,0,0" name="El Salama Hospital"/>
+    <poi id="hosp_018" type="hospital" x="1919.15" y="2740.06" width="14" height="14" color="1,0,0" name="El Shorta Hospital"/>
+    <poi id="hosp_019" type="hospital" x="2596.11" y="1872.35" width="14" height="14" color="1,0,0" name="El Zerayeen Hospital"/>
+    <poi id="hosp_020" type="hospital" x="2047.88" y="2215.97" width="14" height="14" color="1,0,0" name="El Zhraa Hospital"/>
+    <poi id="hosp_021" type="hospital" x="2529.19" y="1430.27" width="14" height="14" color="1,0,0" name="Essam El Shrief El Tkasosy Hospital"/>
+    <poi id="hosp_022" type="hospital" x="3410.68" y="626.75" width="14" height="14" color="0.55,0.55,0.55" name="Nekabet El Moalmen Hospital"/>
+    <poi id="hosp_023" type="hospital" x="2469.9" y="2452.98" width="14" height="14" color="1,0,0" name="Sant Maria Hospital"/>
+    <poi id="hosp_024" type="hospital" x="2441.26" y="3850.66" width="14" height="14" color="0.55,0.55,0.55" name="University Dental Hospital"/>
+    <poi id="hosp_025" type="hospital" x="625.79" y="1674.85" width="14" height="14" color="1,0,0" name="Unnamed hospital (way/94168667)"/>
+    <poi id="hosp_026" type="hospital" x="1429.54" y="3220.84" width="14" height="14" color="0.55,0.55,0.55" name="Unnamed hospital (way/94168695)"/>
+    <poi id="hosp_027" type="hospital" x="2263.47" y="967.29" width="14" height="14" color="1,0,0" name="مستشفى أسيوط العام"/>
+    <poi id="hosp_028" type="hospital" x="2535.67" y="1219.42" width="14" height="14" color="1,0,0" name="ANTAR ENT clinic"/>
+    <poi id="hosp_029" type="hospital" x="2507.65" y="1121.28" width="14" height="14" color="1,0,0" name="مستشفى دار السلام"/>
+</additional>

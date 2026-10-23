@@ -1,0 +1,386 @@
+{
+ "meta": {
+  "area_id": 3603726184,
+  "area_name": "Asyut",
+  "queries": [
+   "amenity=hospital",
+   "healthcare=hospital",
+   "amenity=clinic",
+   "healthcare=clinic",
+   "healthcare=centre"
+  ],
+  "count": 30,
+  "fetched_at": "2026-10-22T16:40:55",
+  "source": "seeded from the Overpass pull performed during the research phase"
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 4229667089,
+   "lat": 27.1838228,
+   "lon": 31.1862351,
+   "tags": {
+    "addr:street": "El-Nemes street",
+    "amenity": "hospital",
+    "emergency": "no",
+    "name": "Arc Angle Mikhael Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667090,
+   "lat": 27.1858024,
+   "lon": 31.1866477,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Zerayeen Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667091,
+   "lat": 27.181769,
+   "lon": 31.1860765,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Essam El Shrief El Tkasosy Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667092,
+   "lat": 27.191093,
+   "lon": 31.1854314,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Sant Maria Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667093,
+   "lat": 27.1887258,
+   "lon": 31.1792153,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Akaad Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667094,
+   "lat": 27.1885444,
+   "lon": 31.1805005,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Dar El Shefaa Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667095,
+   "lat": 27.1888976,
+   "lon": 31.1812939,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Reda Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667096,
+   "lat": 27.1888727,
+   "lon": 31.1812136,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Zhraa Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667098,
+   "lat": 27.1807668,
+   "lon": 31.187412,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Nseem Dr.Trez Mansour Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667099,
+   "lat": 27.1906049,
+   "lon": 31.1797428,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Hayah Hospital",
+    "name:ar": "مستشفی الحياة"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667100,
+   "lat": 27.1907612,
+   "lon": 31.1802102,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Safaa Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667101,
+   "lat": 27.1857479,
+   "lon": 31.1818518,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "El Aksaa Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667102,
+   "lat": 27.1968316,
+   "lon": 31.1786987,
+   "tags": {
+    "amenity": "hospital",
+    "name": "El Salama Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667103,
+   "lat": 27.1935948,
+   "lon": 31.1798333,
+   "tags": {
+    "amenity": "hospital",
+    "name": "El Shorta Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667104,
+   "lat": 27.1954364,
+   "lon": 31.17658,
+   "tags": {
+    "amenity": "hospital",
+    "check_date": "2026-06-03",
+    "healthcare": "hospital",
+    "name": "مستشفى الصدر",
+    "name:ar": "مستشفى الصدر",
+    "name:en": "Asyut Chest Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667105,
+   "lat": 27.1953832,
+   "lon": 31.1749665,
+   "tags": {
+    "amenity": "hospital",
+    "check_date": "2026-06-03",
+    "emergency": "yes",
+    "healthcare": "hospital",
+    "healthcare:speciality": "psychiatry;child_psychiatry",
+    "name": "مستشفى أسيوط للصحة النفسية",
+    "name:ar": "مستشفى أسيوط للصحة النفسية وعلاج الإدمان",
+    "name:en": "Asyout Hospital for Mental Health",
+    "opening_hours": "24/7",
+    "operator": "الأمانة العامة للصحة النفسية",
+    "operator:type": "public",
+    "phone": "https://mentalhealth.mohp.gov.eg/mental/web/ar/hospital/mstshfy-asywt-llsht-alnfsyt; +20 882 148 164"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667119,
+   "lat": 27.1931881,
+   "lon": 31.1881692,
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "مستشفى المبرة",
+    "name:ar": "مستشفى المبرة",
+    "name:en": "Al Mabara Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667120,
+   "lat": 27.1848327,
+   "lon": 31.166287,
+   "tags": {
+    "addr:city": "أسيوط",
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "مستشفی جامعة أسيوط",
+    "name:ar": "مستشفی جامعة أسيوط",
+    "name:en": "Asyut University Hospital",
+    "name:es": "Hospital Universitario de Asiut"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667121,
+   "lat": 27.1669352,
+   "lon": 31.1940161,
+   "tags": {
+    "amenity": "hospital",
+    "name": "Nekabet El Moalmen Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4229667122,
+   "lat": 27.197229,
+   "lon": 31.1794283,
+   "tags": {
+    "amenity": "hospital",
+    "name": "El Fayrouz Hospital"
+   }
+  },
+  {
+   "type": "node",
+   "id": 13322682624,
+   "lat": 27.1810638,
+   "lon": 31.1801785,
+   "tags": {
+    "amenity": "hospital",
+    "name": "Al Rowad"
+   }
+  },
+  {
+   "type": "node",
+   "id": 14078009201,
+   "lat": 27.1774203,
+   "lon": 31.1837216,
+   "tags": {
+    "addr:street": "شارع الميدوب",
+    "amenity": "hospital",
+    "check_date": "2026-08-07",
+    "healthcare": "hospital",
+    "name": "مستشفى أسيوط العام"
+   }
+  },
+  {
+   "type": "node",
+   "id": 14078010101,
+   "lat": 27.1774218,
+   "lon": 31.1837077,
+   "tags": {
+    "amenity": "hospital",
+    "check_date": "2026-08-07",
+    "healthcare": "hospital",
+    "name": "مستشفى أسيوط العام"
+   }
+  },
+  {
+   "type": "way",
+   "id": 94168667,
+   "center": {
+    "lat": 27.1850304,
+    "lon": 31.1665072
+   },
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital"
+   }
+  },
+  {
+   "type": "way",
+   "id": 94168695,
+   "center": {
+    "lat": 27.2003714,
+    "lon": 31.1711841
+   },
+   "tags": {
+    "amenity": "hospital"
+   }
+  },
+  {
+   "type": "way",
+   "id": 770229565,
+   "center": {
+    "lat": 27.1818948,
+    "lon": 31.1841718
+   },
+   "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "مستشفى السلام",
+    "name:ar": "مستشفى السلام",
+    "name:en": "El Salam Hospital"
+   }
+  },
+  {
+   "type": "way",
+   "id": 952587292,
+   "center": {
+    "lat": 27.053273,
+    "lon": 31.3152757
+   },
+   "tags": {
+    "amenity": "hospital",
+    "name": "مستشفي أبو تيج المركزي",
+    "name:ar": "مستشفي أبو تيج المركزي",
+    "name:en": "Abo Teeg Central Hospital"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1176845313,
+   "center": {
+    "lat": 27.269579,
+    "lon": 31.2682896
+   },
+   "tags": {
+    "amenity": "hospital",
+    "name": "University Dental Hospital",
+    "operator": "Sphinx University"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9005085455,
+   "lat": 27.1798304,
+   "lon": 31.1862185,
+   "tags": {
+    "amenity": "clinic",
+    "description": "دكتور أحمد عنتر بدران\nاستاذ واستشاري أول الأذن والأنف والحنجرة - كلية الطب- جامعة أسيوط\nحاصل على:\n- ماجيستير الأذن والأنف والحنجرة: كلية الطب - جامعة أسيوط.\n- زمالة جراحة الأذن وقاع الجمجمة بالمنظار: جامعة مودينا وريجيوإيميليا بمودينا - إيطاليا .\n- 🎓دكتور",
+    "email": "antar.ent.clinic@gmail.com",
+    "healthcare": "clinic",
+    "healthcare:speciality": "otolaryngology",
+    "mobile": "01550186455",
+    "name": "عيادة د/ أحمد عنتر بدران للأذن والأنف والحنجرة (ANTAR ENT clinic (Dr\\Ahmed Antar Badran))",
+    "name:ar": "عيادة د/ أحمد عنتر بدران للأذن والأنف والحنجرة",
+    "name:en": "ANTAR ENT clinic",
+    "opening_hours": "Sa-We 14:00-20:00; Th 17:00-20:00; PH off",
+    "operator": "Dr\\Ahmed Antar Badran",
+    "operator:type": "private",
+    "phone": "0110 114 3023"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10883658615,
+   "lat": 27.1789641,
+   "lon": 31.1860839,
+   "tags": {
+    "addr:street": "شارع 23 يوليو",
+    "amenity": "clinic",
+    "name": "مستشفى دار السلام"
+   }
+  }
+ ]
+}

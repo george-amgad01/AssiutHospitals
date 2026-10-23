@@ -1,0 +1,150 @@
+{
+  "_notes": [
+    "REQUIREMENT 2: zone boundaries and hospital-to-zone assignment are manual.",
+    "The 11/3/3/9 split below was accepted by the project owner on 2026-10-23.",
+    "The loader only validates the file; it never derives an assignment automatically.",
+    "REQUIREMENT 4: emergency capacity/specialty values live in the separate",
+    "file referenced by capacity_file and are labelled SYNTHETIC.",
+    "REQUIREMENT 3 / owner decision G: the search runs only inside the zone that",
+    "contains the snapped ambulance start (start_zone_only).",
+    "REQUIREMENT 5 / owner decision: keep the free-flow cost model only; no",
+    "congestion adjustment is implemented.",
+    "REQUIREMENT 9: the old dashboard, live stream and periodic ambulance flows",
+    "were removed by owner decision.",
+    "REQUIREMENT 7: the owner selected the seven algorithms listed below."
+  ],
+  "zone_source": "OWNER-APPROVED 2026-10-23 - 11/3/3/9 split",
+  "vehicle_class": "emergency",
+  "require_exactly_four_zones": true,
+  "assignment_tolerance_m": 25.0,
+  "capacity_file": "data/emergency_capacity.json",
+  "clinics_as_emergency": false,
+  "search_scope": "start_zone_only",
+  "specialty_catalog": [
+    "general",
+    "trauma",
+    "burns",
+    "cardiac",
+    "stroke",
+    "pediatric",
+    "obstetric",
+    "orthopedic",
+    "toxicology"
+  ],
+  "origin": {
+    "max_snap_distance_m": 400.0,
+    "refuse_dead_end_starts": true,
+    "dead_end_definition": "the start cannot reach the largest strongly connected lane component"
+  },
+  "cost": {
+    "mode": "free_flow",
+    "formula": "seconds = lane_length_m / lane_speed_mps",
+    "congestion": {
+      "enabled": false,
+      "owner_decision": "keep free-flow only; congestion adjustment was not approved for implementation"
+    }
+  },
+  "excluded_destinations": {
+    "asyut-university-hospital": "dead-end road (owner decision D: exclude dead-end destinations)",
+    "osm-way-94168667": "dead-end road (owner decision D: exclude dead-end destinations)"
+  },
+  "comparison_algorithms": [
+    "dijkstra",
+    "astar",
+    "bellman_ford",
+    "vam",
+    "least_cost",
+    "northwest_corner",
+    "modi"
+  ],
+  "owner_decisions": {
+    "A": "Accept the current unequal 11/3/3/9 zone split.",
+    "B": "Keep the clearly labelled SYNTHETIC emergency capacity/specialty data.",
+    "C": "Do not count the two clinics as emergency facilities (clinics_as_emergency=false).",
+    "D": "Exclude the two dead-end hospitals from dispatch destinations.",
+    "E": "osm-way-94168695 stays outside the 250 m routability limit; it is shown on the map only.",
+    "F": "Use the current manual quadrant boundaries.",
+    "G": "Search only the zone containing the start point, then return its nearest suitable hospital.",
+    "H": "Compare Dijkstra, A*, Bellman-Ford, VAM, least-cost, north-west corner and MODI.",
+    "I": "Refuse a start on a dead-end component that cannot reach the main lane component.",
+    "J": "Keep the 400 m maximum snap distance for the ambulance start.",
+    "K": "Keep the three outside-network hospitals on the map only.",
+    "L": "Fit the map to the real network bounds."
+  },
+  "zones": [
+    {
+      "id": "Z1",
+      "name": "North-West",
+      "boundary": {
+        "south": 27.1862549275,
+        "west": 31.1608724667,
+        "north": 27.2038969272,
+        "east": 31.181265156
+      },
+      "hospitals": [
+        "asyout-hospital-for-mental-health",
+        "asyut-chest-hospital",
+        "dar-el-shefaa-hospital",
+        "el-akaad-hospital",
+        "el-fayrouz-hospital",
+        "el-hayah-hospital",
+        "el-safaa-hospital",
+        "el-salama-hospital",
+        "el-shorta-hospital",
+        "el-zhraa-hospital",
+        "osm-way-94168695"
+      ]
+    },
+    {
+      "id": "Z2",
+      "name": "North-East",
+      "boundary": {
+        "south": 27.1862549275,
+        "west": 31.181265156,
+        "north": 27.2038969272,
+        "east": 31.2016578449
+      },
+      "hospitals": [
+        "al-mabara-hospital",
+        "el-reda-hospital",
+        "sant-maria-hospital"
+      ]
+    },
+    {
+      "id": "Z3",
+      "name": "South-West",
+      "boundary": {
+        "south": 27.1686129285,
+        "west": 31.1608724667,
+        "north": 27.1862549275,
+        "east": 31.181265156
+      },
+      "hospitals": [
+        "al-rowad",
+        "asyut-university-hospital",
+        "osm-way-94168667"
+      ]
+    },
+    {
+      "id": "Z4",
+      "name": "South-East",
+      "boundary": {
+        "south": 27.1686129285,
+        "west": 31.181265156,
+        "north": 27.1862549275,
+        "east": 31.2016578449
+      },
+      "hospitals": [
+        "antar-ent-clinic",
+        "arc-angle-mikhael-hospital",
+        "el-aksaa-hospital",
+        "el-nseem-dr-trez-mansour-hospital",
+        "el-salam-hospital",
+        "el-zerayeen-hospital",
+        "essam-el-shrief-el-tkasosy-hospital",
+        "osm-node-14078009201",
+        "osm-node-10883658615"
+      ]
+    }
+  ]
+}

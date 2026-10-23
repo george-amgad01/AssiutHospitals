@@ -1,0 +1,73 @@
+{
+  "network": {
+    "net_file": "D:\\Dashboard - Copy\\sumo\\Version 3 George.net.xml",
+    "route_file": "D:\\Dashboard - Copy\\sumo\\project (1).rou.xml",
+    "sumocfg_file": "D:\\Dashboard - Copy\\sumo\\project (2).sumocfg",
+    "additional_file": "D:\\Dashboard - Copy\\sumo\\project (2).add.xml",
+    "sumo_binary": "sumo",
+    "sumo_home": ""
+  },
+  "projection": {
+    "zone": 36,
+    "northern_hemisphere": true
+  },
+  "overpass": {
+    "area_id": 3603726184,
+    "area_name": "Asyut",
+    "cache_file": "data/osm_hospitals_raw.json",
+    "refresh": false,
+    "timeout_seconds": 90,
+    "mirrors": [
+      "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+      "https://overpass.private.coffee/api/interpreter"
+    ]
+  },
+  "snapping": {
+    "max_snap_distance_m": 250.0
+  },
+  "ambulances": {
+    "vtype": "emergency",
+    "vtype_class": "emergency",
+    "define_vtype_if_missing": true,
+    "color": "220,30,30",
+    "begin": 0,
+    "end": 3600,
+    "inbound_rate_per_hour": 4.0,
+    "outbound_rate_per_hour": 4.0,
+    "use_exponential": false,
+    "inbound_period_seconds": 600.0,
+    "outbound_period_seconds": 600.0,
+    "include_base_routes": true,
+    "include_base_additional": false,
+    "origin_junctions": [
+      "7806952785",
+      "4030969295",
+      "J4",
+      "J8",
+      "J16",
+      "J17",
+      "J19",
+      "J20",
+      "J24",
+      "J28",
+      "J37",
+      "1130035964",
+      "1130035659",
+      "4229667114",
+      "6640301060",
+      "6583781471",
+      "1094558909",
+      "cluster_1094556896_4030989866"
+    ]
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8770,
+    "step_seconds": 1.0,
+    "update_hz": 2,
+    "vehicle_types": ["emergency"],
+    "max_vehicles": 600
+  }
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assiut &mdash; emergency dispatch</title>
+<link rel="stylesheet" href="vendor/leaflet.css" />
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #171f27;
+    --line: #2a3744;
+    --text: #dce6ef;
+    --muted: #8fa3b5;
+    --accent: #ff4d4f;
+    --ok: #3ddc97;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  #map { position: absolute; inset: 0; background: #0b1015; }
+
+  #panel {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 340px;
+    max-height: calc(100% - 32px);
+    overflow: auto;
+    background: rgba(23, 31, 39, 0.96);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+  }
+  h1 { margin: 0 0 2px; font-size: 16px; letter-spacing: 0.2px; }
+  .sub { color: var(--muted); font-size: 11px; margin-bottom: 12px; }
+  label { display: block; color: var(--muted); font-size: 11px; margin: 10px 0 4px; text-transform: uppercase; letter-spacing: 0.6px; }
+  select, input[type="number"] {
+    width: 100%;
+    background: #0f151b;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 7px 8px;
+    font: inherit;
+    outline: none;
+  }
+  select:focus, input[type="number"]:focus { border-color: var(--accent); }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.55; cursor: default; }
+  button.secondary { background: #253442; color: var(--text); margin-top: 6px; }
+  #status { margin-top: 12px; color: var(--muted); font-size: 12px; min-height: 18px; }
+  #status.error { color: #ff8b8d; }
+  #result { margin-top: 10px; display: none; border-top: 1px solid var(--line); padding-top: 10px; }
+  #result h2 { margin: 0 0 2px; font-size: 14px; }
+  #result .zone { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
+  #result .time { font-size: 26px; font-weight: 700; color: var(--ok); line-height: 1.1; }
+  #result .time span { font-size: 12px; color: var(--muted); font-weight: 400; }
+  #result .meta { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  #result .route { margin-top: 8px; color: var(--muted); font-size: 10px; word-break: break-all; }
+  .badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    background: #3a2a12;
+    color: #ffc46b;
+    border: 1px solid #5a421c;
+  }
+  .legend { margin-top: 12px; color: var(--muted); font-size: 11px; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+  .legend .h { background: #e74c3c; }
+  .legend .s { background: #2f80ed; }
+  .legend .r { width: 14px; height: 3px; border-radius: 2px; background: var(--accent); vertical-align: middle; }
+  .leaflet-container { font: inherit; }
+</style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="panel">
+    <h1>Emergency dispatch</h1>
+    <div class="sub">Nearest suitable hospital by fastest free-flow travel time &mdash; start zone only</div>
+    <div id="data-badge" class="badge" style="display:none"></div>
+
+    <label for="specialty">Required specialty</label>
+    <select id="specialty"></select>
+
+    <label>Ambulance start</label>
+    <div class="row">
+      <div><input id="lat" type="number" step="0.000001" placeholder="latitude" /></div>
+      <div><input id="lon" type="number" step="0.000001" placeholder="longitude" /></div>
+    </div>
+    <button id="search">Find fastest hospital</button>
+    <button id="clear" class="secondary">Clear</button>
+
+    <div id="status">Click the map to set the ambulance start.</div>
+    <div class="legend">
+      Free-flow travel time only; no congestion adjustment. Hospitals outside
+      the routed network are shown on the map but are never selected.
+    </div>
+
+    <div id="result">
+      <h2 id="r-name"></h2>
+      <div id="r-zone" class="zone"></div>
+      <div class="time"><b id="r-time"></b> <span>seconds (expected)</span></div>
+      <div id="r-meta" class="meta"></div>
+      <div id="r-route" class="route"></div>
+    </div>
+
+    <div class="legend">
+      <div><i class="h"></i>hospital (real coordinates)</div>
+      <div><i class="s"></i>ambulance start</div>
+      <div><i class="r"></i>fastest route</div>
+    </div>
+  </div>
+
+  <script src="vendor/leaflet.js"></script>
+  <script src="network.js"></script>
+  <script src="hospitals.js"></script>
+  <script src="dispatch.js"></script>
+</body>
+</html>

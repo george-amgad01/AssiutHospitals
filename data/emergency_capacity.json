@@ -1,0 +1,220 @@
+{
+  "source": "SYNTHETIC",
+  "notice": "SYNTHETIC DATA. OSM does not publish free emergency places or hospital specialty lists. Every beds_total / beds_free / specialties value in this file is invented for testing the dispatch tool and MUST be replaced with real owner-provided data before operational use.",
+  "specialties_catalog": [
+    "general",
+    "trauma",
+    "burns",
+    "cardiac",
+    "stroke",
+    "pediatric",
+    "obstetric",
+    "orthopedic",
+    "toxicology"
+  ],
+  "hospitals": {
+    "abo-teeg-central-hospital": {
+      "emergency_department": true,
+      "beds_total": 12,
+      "beds_free": 4,
+      "specialties": ["general", "trauma", "pediatric"],
+      "note": "SYNTHETIC - outside the network"
+    },
+    "al-mabara-hospital": {
+      "emergency_department": true,
+      "beds_total": 20,
+      "beds_free": 6,
+      "specialties": ["general", "burns", "cardiac", "trauma"],
+      "note": "SYNTHETIC"
+    },
+    "al-rowad": {
+      "emergency_department": true,
+      "beds_total": 10,
+      "beds_free": 3,
+      "specialties": ["general", "trauma", "orthopedic"],
+      "note": "SYNTHETIC"
+    },
+    "antar-ent-clinic": {
+      "emergency_department": true,
+      "beds_total": 4,
+      "beds_free": 2,
+      "specialties": ["general", "pediatric"],
+      "note": "SYNTHETIC - clinic; counts_as_emergency is a pending decision (C)"
+    },
+    "arc-angle-mikhael-hospital": {
+      "emergency_department": true,
+      "beds_total": 12,
+      "beds_free": 5,
+      "specialties": ["general", "trauma", "orthopedic"],
+      "note": "SYNTHETIC"
+    },
+    "asyout-hospital-for-mental-health": {
+      "emergency_department": true,
+      "beds_total": 8,
+      "beds_free": 2,
+      "specialties": ["general"],
+      "note": "SYNTHETIC"
+    },
+    "asyut-chest-hospital": {
+      "emergency_department": true,
+      "beds_total": 14,
+      "beds_free": 4,
+      "specialties": ["general", "cardiac"],
+      "note": "SYNTHETIC"
+    },
+    "asyut-university-hospital": {
+      "emergency_department": true,
+      "beds_total": 30,
+      "beds_free": 8,
+      "specialties": ["general", "trauma", "burns", "toxicology", "cardiac", "pediatric"],
+      "note": "SYNTHETIC - dead-end road, inbound only"
+    },
+    "dar-el-shefaa-hospital": {
+      "emergency_department": true,
+      "beds_total": 16,
+      "beds_free": 5,
+      "specialties": ["general", "cardiac", "stroke"],
+      "note": "SYNTHETIC"
+    },
+    "el-akaad-hospital": {
+      "emergency_department": true,
+      "beds_total": 10,
+      "beds_free": 3,
+      "specialties": ["general", "orthopedic"],
+      "note": "SYNTHETIC"
+    },
+    "el-aksaa-hospital": {
+      "emergency_department": true,
+      "beds_total": 14,
+      "beds_free": 4,
+      "specialties": ["general", "cardiac", "stroke"],
+      "note": "SYNTHETIC"
+    },
+    "el-fayrouz-hospital": {
+      "emergency_department": true,
+      "beds_total": 10,
+      "beds_free": 2,
+      "specialties": ["general", "pediatric"],
+      "note": "SYNTHETIC"
+    },
+    "el-hayah-hospital": {
+      "emergency_department": true,
+      "beds_total": 18,
+      "beds_free": 5,
+      "specialties": ["general", "stroke", "obstetric", "pediatric"],
+      "note": "SYNTHETIC"
+    },
+    "el-nseem-dr-trez-mansour-hospital": {
+      "emergency_department": true,
+      "beds_total": 12,
+      "beds_free": 3,
+      "specialties": ["general", "obstetric"],
+      "note": "SYNTHETIC"
+    },
+    "el-reda-hospital": {
+      "emergency_department": true,
+      "beds_total": 14,
+      "beds_free": 4,
+      "specialties": ["general", "pediatric", "obstetric"],
+      "note": "SYNTHETIC"
+    },
+    "el-safaa-hospital": {
+      "emergency_department": true,
+      "beds_total": 16,
+      "beds_free": 6,
+      "specialties": ["general", "pediatric", "obstetric"],
+      "note": "SYNTHETIC"
+    },
+    "el-salam-hospital": {
+      "emergency_department": true,
+      "beds_total": 20,
+      "beds_free": 7,
+      "specialties": ["general", "cardiac", "trauma", "stroke"],
+      "note": "SYNTHETIC"
+    },
+    "el-salama-hospital": {
+      "emergency_department": true,
+      "beds_total": 12,
+      "beds_free": 3,
+      "specialties": ["general", "pediatric"],
+      "note": "SYNTHETIC"
+    },
+    "el-shorta-hospital": {
+      "emergency_department": true,
+      "beds_total": 18,
+      "beds_free": 0,
+      "specialties": ["general", "burns", "trauma", "toxicology"],
+      "note": "SYNTHETIC - deliberately full, to exercise the skip rule"
+    },
+    "el-zerayeen-hospital": {
+      "emergency_department": true,
+      "beds_total": 10,
+      "beds_free": 2,
+      "specialties": ["general", "orthopedic"],
+      "note": "SYNTHETIC"
+    },
+    "el-zhraa-hospital": {
+      "emergency_department": true,
+      "beds_total": 22,
+      "beds_free": 6,
+      "specialties": ["general", "burns", "cardiac", "stroke", "pediatric"],
+      "note": "SYNTHETIC"
+    },
+    "essam-el-shrief-el-tkasosy-hospital": {
+      "emergency_department": true,
+      "beds_total": 12,
+      "beds_free": 4,
+      "specialties": ["general", "burns", "orthopedic"],
+      "note": "SYNTHETIC"
+    },
+    "nekabet-el-moalmen-hospital": {
+      "emergency_department": true,
+      "beds_total": 6,
+      "beds_free": 1,
+      "specialties": ["general"],
+      "note": "SYNTHETIC - outside the network"
+    },
+    "sant-maria-hospital": {
+      "emergency_department": true,
+      "beds_total": 18,
+      "beds_free": 5,
+      "specialties": ["general", "burns", "cardiac", "obstetric"],
+      "note": "SYNTHETIC"
+    },
+    "university-dental-hospital": {
+      "emergency_department": true,
+      "beds_total": 4,
+      "beds_free": 0,
+      "specialties": ["general"],
+      "note": "SYNTHETIC - outside the network"
+    },
+    "osm-way-94168667": {
+      "emergency_department": true,
+      "beds_total": 10,
+      "beds_free": 3,
+      "specialties": ["general", "trauma"],
+      "note": "SYNTHETIC - dead-end road, inbound only"
+    },
+    "osm-way-94168695": {
+      "emergency_department": true,
+      "beds_total": 8,
+      "beds_free": 2,
+      "specialties": ["general"],
+      "note": "SYNTHETIC - 455 m from any road, excluded by the routable rule"
+    },
+    "osm-node-14078009201": {
+      "emergency_department": true,
+      "beds_total": 25,
+      "beds_free": 6,
+      "specialties": ["general", "trauma", "burns", "cardiac", "stroke", "toxicology"],
+      "note": "SYNTHETIC"
+    },
+    "osm-node-10883658615": {
+      "emergency_department": true,
+      "beds_total": 6,
+      "beds_free": 2,
+      "specialties": ["general", "pediatric"],
+      "note": "SYNTHETIC - clinic; counts_as_emergency is a pending decision (C)"
+    }
+  }
+}
