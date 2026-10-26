@@ -1,0 +1,13 @@
+check,passed
+bed_capacity_respected,True
+demand_met,True
+fleet_limit_respected,True
+integer_allocations,True
+kit_demand_matched,True
+patient_demand_matched,True
+prohibited_lanes_avoided,True
+road_capacity_respected,True
+routes_continuous,True
+solver_success,True
+supply_within_limits,True
+zone_trip_balance,True

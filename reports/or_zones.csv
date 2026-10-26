@@ -1,0 +1,5 @@
+zone,name,anchor,hospital_count,active_sources,patient_destinations,kit_supply,kit_demand,patient_demand,free_beds
+Z1,North-West,el-hayah-hospital,10,6,6,60,50,6,29
+Z2,North-East,al-mabara-hospital,3,3,3,40,40,4,15
+Z3,South-West,al-rowad,3,1,3,10,40,4,14
+Z4,South-East,el-salam-hospital,9,7,7,70,40,4,31

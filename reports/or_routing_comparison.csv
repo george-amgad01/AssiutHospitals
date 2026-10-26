@@ -1,0 +1,13 @@
+source_zone,source,target_zone,target,algorithm,found,distance_m,seconds,settled,elapsed_seconds,consistent
+Z1,asyut-chest-hospital,Z2,al-mabara-hospital,Dijkstra,True,1943.518,79.5788,420,0.0021159,True
+Z1,asyut-chest-hospital,Z2,al-mabara-hospital,A*,True,1943.518,79.5788,158,0.0011259,True
+Z1,asyut-chest-hospital,Z2,al-mabara-hospital,Bellman-Ford,True,1943.518,79.5788,4619,0.1072186,True
+Z2,al-mabara-hospital,Z3,al-rowad,Dijkstra,True,2713.241,135.3597,1107,0.0053843,True
+Z2,al-mabara-hospital,Z3,al-rowad,A*,True,2713.241,135.3597,413,0.0023154,True
+Z2,al-mabara-hospital,Z3,al-rowad,Bellman-Ford,True,2713.241,135.3597,4619,0.106527,True
+Z3,al-rowad,Z4,el-salam-hospital,Dijkstra,True,1204.77,75.6856,379,0.0017962,True
+Z3,al-rowad,Z4,el-salam-hospital,A*,True,1204.77,75.6856,203,0.0010271,True
+Z3,al-rowad,Z4,el-salam-hospital,Bellman-Ford,True,1204.77,75.6856,4618,0.0697363,True
+Z4,arc-angle-mikhael-hospital,Z1,el-hayah-hospital,Dijkstra,True,2002.15,112.7408,1185,0.0056734,True
+Z4,arc-angle-mikhael-hospital,Z1,el-hayah-hospital,A*,True,2002.15,112.7408,487,0.0025942,True
+Z4,arc-angle-mikhael-hospital,Z1,el-hayah-hospital,Bellman-Ford,True,2002.15,112.7408,4620,0.0720175,True

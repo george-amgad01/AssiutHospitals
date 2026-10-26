@@ -8,6 +8,8 @@ Usage
     python run.py serve                 # serve the static dispatch map
     python run.py dispatch --lat 27.19 --lon 31.18 --specialty burns
     python run.py compare               # measured algorithm comparison table
+    python run.py or-plan               # capacity-constrained OR plan + reports
+    python run.py or-check              # validate the OR model without writing files
     python run.py list                  # print the hospital table
     python run.py info                  # show the resolved configuration
 """
@@ -264,6 +266,154 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0 if payload["failures"] == 0 else 1
 
 
+def _or_summary_lines(result) -> None:
+    """Print the compact, non-hiding summary used by both OR commands."""
+    synthetic = result.data.synthetic or result.capacity.synthetic
+    print("  synthetic input: {0}".format(
+        "YES - replace before operational use" if synthetic else "no"
+    ))
+    print("  hospitals      : {0} routable, {1} zones".format(
+        len(result.hospitals), len(result.zones)
+    ))
+    print("  kit supply     : {0} kits in {1} active sources".format(
+        result.total_kit_supply,
+        sum(1 for item in result.hospitals.values() if item.source_active),
+    ))
+    gap = result.total_kit_supply - result.total_kit_demand
+    print("  kit demand     : {0} kits; unused supply {1}, unmet demand {2}".format(
+        result.total_kit_demand, max(gap, 0), max(-gap, 0)
+    ))
+    print("  patient demand : {0} transfers; {1} usable free beds".format(
+        result.total_patient_demand, result.total_beds
+    ))
+    vam = result.transport.get("VAM")
+    modi = result.transport.get("MODI")
+    exact = result.transport.get("exact-MILP")
+    print("  VAM Z0         : {0} kit-metres".format(
+        "n/a" if vam is None else "{0:.3f}".format(vam.objective)
+    ))
+    print("  MODI           : {0} ({1})".format(
+        "n/a" if modi is None else "{0:.3f} kit-metres".format(modi.objective),
+        "n/a" if modi is None else modi.status,
+    ))
+    print("  exact tableau  : {0}".format(
+        "n/a" if exact is None else "{0:.3f} kit-metres".format(exact.objective)
+    ))
+    plan = result.network_plan
+    if plan is not None:
+        print("  network MILP   : {0} / success={1}".format(plan.status, plan.success))
+        print("  demand met     : {0} (unmet kits {1}, unmet patients {2})".format(
+            plan.demand_met, plan.total_unmet_kits, plan.total_unmet_patients
+        ))
+        print("  vehicles       : {0} / {1}".format(
+            plan.vehicles_used, result.config.fleet_size
+        ))
+        print("  vehicle-metres : {0:.3f} (kit {1:.3f}, patient {2:.3f})".format(
+            plan.total_vehicle_m, plan.kit_vehicle_m, plan.patient_vehicle_m
+        ))
+    print("  feasible       : {0}".format("YES" if result.feasible else "NO"))
+    print("  optimal         : {0}".format(
+        "YES for the stated network MILP"
+        if result.optimal
+        else "NO - not a proof of global optimality"
+    ))
+    for error in result.errors:
+        print("  ERROR          : {0}".format(error))
+    for warning in result.warnings:
+        print("  warning        : {0}".format(warning))
+
+
+def _or_result_label(result) -> str:
+    """Distinguish a feasible plan, unmet demand, and a hard model failure."""
+    plan = result.network_plan
+    if result.errors:
+        return "FAIL (model or physical check failed)"
+    if plan is None:
+        return "FAIL (no network plan)"
+    if not plan.success:
+        return "FAIL / INFEASIBLE"
+    if not plan.demand_met:
+        return "FAIL (unmet demand)"
+    if not plan.feasible:
+        return "FAIL (physical constraint)"
+    return "PASS (feasible)"
+
+
+def cmd_or_plan(args: argparse.Namespace) -> int:
+    """Build and solve the complete OR plan and write every report.
+
+    يبني ويحل خطة بحوث العمليات كاملة ويكتب كل التقارير.
+    """
+    from assiut_hospitals.or_config import ORConfigError, load_or_config
+    from assiut_hospitals.or_planning import ORPlanner
+    from assiut_hospitals.or_report import write_reports
+
+    config = load_config(args.config)
+    try:
+        or_config = load_or_config(args.or_config, root=config.root)
+        planner = ORPlanner(config=config, or_config=or_config)
+        result = planner.plan(routing_comparison=not args.no_routing_comparison)
+    except ORConfigError as exc:
+        print("OR CONFIG ERROR: {0}".format(exc))
+        return 2
+    except Exception as exc:  # network/route/solver failures must be visible
+        print("OR RUN ERROR: {0}".format(exc))
+        return 2
+
+    _print_header("OR capacity-constrained plan")
+    _or_summary_lines(result)
+    if not args.no_write:
+        out_dir = Path(args.out_dir) if args.out_dir else result.config.output_dir
+        paths = write_reports(result, out_dir)
+        print()
+        print("  report         : {0}".format(paths["markdown"]))
+        print("  json           : {0}".format(paths["json"]))
+        print("  tables / csv   : {0}".format(out_dir))
+        print("  route sketch   : {0}".format(paths["routes_svg"]))
+    if args.json:
+        print()
+        print(json.dumps(result.summary(), ensure_ascii=False, indent=1, default=str))
+    print()
+    print("  RESULT: {0}".format(_or_result_label(result)))
+    return 0 if result.feasible else 1
+
+
+def cmd_or_check(args: argparse.Namespace) -> int:
+    """Run the OR model and print its independent constraints without files.
+
+    يشغّل نموذج بحوث العمليات ويطبع قيوده المستقلة دون كتابة ملفات.
+    """
+    from assiut_hospitals.or_config import ORConfigError, load_or_config
+    from assiut_hospitals.or_planning import ORPlanner
+
+    config = load_config(args.config)
+    try:
+        or_config = load_or_config(args.or_config, root=config.root)
+        planner = ORPlanner(config=config, or_config=or_config)
+        result = planner.plan(routing_comparison=False)
+    except ORConfigError as exc:
+        print("OR CONFIG ERROR: {0}".format(exc))
+        return 2
+    except Exception as exc:
+        print("OR RUN ERROR: {0}".format(exc))
+        return 2
+
+    _print_header("OR checks")
+    _or_summary_lines(result)
+    plan = result.network_plan
+    if plan is not None:
+        print()
+        print("  independent checks:")
+        for name, passed in sorted(plan.checks.items()):
+            print("    {0:<32} {1}".format(name, "PASS" if passed else "FAIL"))
+    print()
+    if args.json:
+        print(json.dumps(result.summary(), ensure_ascii=False, indent=1, default=str))
+    print()
+    print("  RESULT: {0}".format(_or_result_label(result)))
+    return 0 if result.feasible and not result.errors else 1
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     config = load_config(args.config)
     _print_header("info")
@@ -318,6 +468,52 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_compare.add_argument("--quiet", action="store_true", help="do not print each case")
     p_compare.set_defaults(func=cmd_compare)
+
+    p_or_plan = sub.add_parser(
+        "or-plan", help="solve the capacity-constrained OR model and write reports"
+    )
+    p_or_plan.add_argument(
+        "--or-config",
+        default=None,
+        help="path to config/or_planning.json (default: config/or_planning.json)",
+    )
+    p_or_plan.add_argument(
+        "--json",
+        action="store_true",
+        help="print the machine-readable summary in addition to the text",
+    )
+    p_or_plan.add_argument(
+        "--out-dir",
+        default=None,
+        help="directory for the OR reports (default: reports/)",
+    )
+    p_or_plan.add_argument(
+        "--no-write",
+        action="store_true",
+        help="do not write reports (use --json for the summary)",
+    )
+    p_or_plan.add_argument(
+        "--no-routing-comparison",
+        action="store_true",
+        help="skip the Dijkstra/A*/Bellman-Ford comparison",
+    )
+    p_or_plan.set_defaults(func=cmd_or_plan)
+
+    p_or_check = sub.add_parser(
+        "or-check",
+        help="solve the OR model and print checks without writing reports",
+    )
+    p_or_check.add_argument(
+        "--or-config",
+        default=None,
+        help="path to config/or_planning.json (default: config/or_planning.json)",
+    )
+    p_or_check.add_argument(
+        "--json",
+        action="store_true",
+        help="print the machine-readable summary in addition to the text",
+    )
+    p_or_check.set_defaults(func=cmd_or_check)
 
     p_dispatch = sub.add_parser(
         "dispatch", help="find the fastest suitable hospital from a point"

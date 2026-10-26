@@ -1,0 +1,26 @@
+slug,display_name,category,zone_id,emergency,beds_total,beds_free,kit_supply,can_leave,can_enter,source_active,patient_destination,excluded_reason,snap_distance_m
+al-mabara-hospital,Al Mabara Hospital,hospital,Z2,True,20,6,20,True,True,True,True,,26.37
+al-rowad,Al Rowad,hospital,Z3,True,10,3,10,True,True,True,True,,76.26
+antar-ent-clinic,ANTAR ENT clinic,clinic,Z4,False,4,2,0,True,True,False,False,not an emergency facility under the clinic policy,14.74
+arc-angle-mikhael-hospital,Arc Angle Mikhael Hospital,hospital,Z4,True,12,5,10,True,True,True,True,,6.22
+asyout-hospital-for-mental-health,Asyout Hospital for Mental Health,hospital,Z1,True,8,2,0,False,False,False,False,receiving lane cannot be reached from the main network,56.52
+asyut-chest-hospital,Asyut Chest Hospital,hospital,Z1,True,14,4,10,True,True,True,True,,31.74
+asyut-university-hospital,Asyut University Hospital,hospital,Z3,True,30,8,0,False,True,False,True,,127.35
+dar-el-shefaa-hospital,Dar El Shefaa Hospital,hospital,Z1,True,16,5,0,False,True,False,True,,1.14
+el-akaad-hospital,El Akaad Hospital,hospital,Z1,True,10,3,10,True,True,True,True,,2.41
+el-aksaa-hospital,El Aksaa Hospital,hospital,Z4,True,14,4,10,True,True,True,True,,16.0
+el-fayrouz-hospital,El Fayrouz Hospital,hospital,Z1,True,10,2,0,False,False,False,False,receiving lane cannot be reached from the main network,131.19
+el-hayah-hospital,El Hayah Hospital,hospital,Z1,True,18,5,10,True,True,True,True,,1.67
+el-nseem-dr-trez-mansour-hospital,El Nseem Dr.Trez Mansour Hospital,hospital,Z4,True,12,3,10,True,True,True,True,,3.14
+el-reda-hospital,El Reda Hospital,hospital,Z2,True,14,4,10,True,True,True,True,,1.61
+el-safaa-hospital,El Safaa Hospital,hospital,Z1,True,16,6,10,True,True,True,True,,0.96
+el-salam-hospital,El Salam Hospital,hospital,Z4,True,20,7,10,True,True,True,True,,15.06
+el-salama-hospital,El Salama Hospital,hospital,Z1,True,12,3,0,False,False,False,False,receiving lane cannot be reached from the main network,53.67
+el-shorta-hospital,El Shorta Hospital,hospital,Z1,True,18,0,10,True,False,True,False,no free emergency bed,0.1
+el-zerayeen-hospital,El Zerayeen Hospital,hospital,Z4,True,10,2,10,True,True,True,True,,15.31
+el-zhraa-hospital,El Zhraa Hospital,hospital,Z1,True,22,6,10,True,True,True,True,,1.07
+essam-el-shrief-el-tkasosy-hospital,Essam El Shrief El Tkasosy Hospital,hospital,Z4,True,12,4,10,True,True,True,True,,14.02
+osm-node-10883658615,مستشفى دار السلام,clinic,Z4,False,6,2,0,True,True,False,False,not an emergency facility under the clinic policy,13.29
+osm-node-14078009201,مستشفى أسيوط العام,hospital,Z4,True,25,6,10,True,True,True,True,,28.93
+osm-way-94168667,Unnamed hospital (way/94168667),hospital,Z3,True,10,3,0,False,True,False,True,,141.64
+sant-maria-hospital,Sant Maria Hospital,hospital,Z2,True,18,5,10,True,True,True,True,,1.95

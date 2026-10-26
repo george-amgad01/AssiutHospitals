@@ -1,0 +1,75 @@
+{
+  "source": "SYNTHETIC",
+  "notice": "SYNTHETIC TEST DATA. OSM/SUMO do not publish hospital kit stock, zone demand, patient-transfer demand, background lane flow, or measured road capacity. Every number below is a configurable test value and must be replaced with owner-provided data before operational use.",
+  "units": {
+    "kits": "one medical kit (indivisible)",
+    "kit_trips": "one ambulance trip carrying kits_per_trip (10) kits",
+    "patients": "one patient transfer",
+    "beds": "one free emergency bed (receiving capacity, not shipped)"
+  },
+  "zone_anchors": {
+    "Z1": {
+      "hospital_slug": "el-hayah-hospital",
+      "note": "Real hospital location used as the Z1 delivery/patient origin anchor; its lane is in the main strongly connected component."
+    },
+    "Z2": {
+      "hospital_slug": "al-mabara-hospital",
+      "note": "Real hospital location used as the Z2 delivery/patient origin anchor; its lane is in the main strongly connected component."
+    },
+    "Z3": {
+      "hospital_slug": "al-rowad",
+      "note": "Real hospital location used as the Z3 delivery/patient origin anchor; its lane is in the main strongly connected component."
+    },
+    "Z4": {
+      "hospital_slug": "el-salam-hospital",
+      "note": "Real hospital location used as the Z4 delivery/patient origin anchor; its lane is in the main strongly connected component."
+    }
+  },
+  "kit_supply_by_hospital": {
+    "al-mabara-hospital": 20,
+    "al-rowad": 10,
+    "arc-angle-mikhael-hospital": 10,
+    "asyout-hospital-for-mental-health": 0,
+    "asyut-chest-hospital": 10,
+    "asyut-university-hospital": 0,
+    "dar-el-shefaa-hospital": 0,
+    "el-akaad-hospital": 10,
+    "el-aksaa-hospital": 10,
+    "el-fayrouz-hospital": 0,
+    "el-hayah-hospital": 10,
+    "el-nseem-dr-trez-mansour-hospital": 10,
+    "el-reda-hospital": 10,
+    "el-safaa-hospital": 10,
+    "el-salam-hospital": 10,
+    "el-salama-hospital": 0,
+    "el-shorta-hospital": 10,
+    "el-zerayeen-hospital": 10,
+    "el-zhraa-hospital": 10,
+    "essam-el-shrief-el-tkasosy-hospital": 10,
+    "sant-maria-hospital": 10,
+    "osm-way-94168667": 0,
+    "osm-node-14078009201": 10,
+    "antar-ent-clinic": 0,
+    "osm-node-10883658615": 0
+  },
+  "zone_demand_kits": {
+    "Z1": 50,
+    "Z2": 40,
+    "Z3": 40,
+    "Z4": 40
+  },
+  "zone_demand_patients": {
+    "Z1": 6,
+    "Z2": 4,
+    "Z3": 4,
+    "Z4": 4
+  },
+  "background_lane_flow": {},
+  "background_note": "No measured lane-level ordinary traffic is available in the repository. The shipped value is zero. A real deployment must replace this with a lane-flow table; background flow is never mixed into the ambulance total.",
+  "synthetic_choices": [
+    "One active kit source (al-mabara-hospital) carries 20 kits and the other active sources carry 10, producing 180 total kits against 170 zone demand. The resulting 10-kit surplus is shown as a dummy destination in the transportation tableau.",
+    "Kit supplies are zero at dead-end sources and at clinics, because those facilities cannot both dispatch a vehicle and act as an emergency kit source under the owner policies.",
+    "Zone kit demand and patient demand are unequal test values, not measured demand.",
+    "The background flow is zero rather than invented."
+  ]
+}

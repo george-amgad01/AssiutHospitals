@@ -1,0 +1,55 @@
+{
+  "_notes": [
+    "Operations Research extension: capacity-constrained medical-kit and patient distribution.",
+    "The model is documented in OR_MODEL.md before this file is used.",
+    "All quantities that OSM/SUMO do not publish are in data/or_test_data.json and are labelled SYNTHETIC.",
+    "Road capacity is an explicit estimate from lane count and road type; it is not a measured capacity.",
+    "Background lane flow is separate from the 48-ambulance fleet and is zero in the shipped test data because no measured value exists.",
+    "Prohibited lanes are excluded from the lane graph. Network vehicle-class restrictions are always enforced; explicit closures can be added below.",
+    "The standard transportation tableau (VAM/least-cost/NWC/MODI) does not contain lane capacities. The network-constrained MILP enforces them."
+  ],
+  "data_file": "data/or_test_data.json",
+  "dispatch_config": "config/dispatch.json",
+  "vehicle_class": "emergency",
+  "fleet_size": 48,
+  "kits_per_trip": 10,
+  "ambulance_trips_per_day": 1,
+  "shift_hours": 12.0,
+  "planning_horizon_hours": 24.0,
+  "max_point_snap_m": 500.0,
+  "max_routable_snap_m": 400.0,
+  "require_hospital_count": 25,
+  "require_exactly_four_zones": true,
+  "explicit_prohibited_lanes": [],
+  "road_capacity": {
+    "source": "SYNTHETIC_ESTIMATE",
+    "notice": "No measured lane capacity is present in the repository. C_e = vehicles_per_lane_hour(type) * lane_planning_hours * (1 - reserve_fraction). This is a documented planning estimate, not a measurement.",
+    "planning_interval_hours": 24.0,
+    "default_vehicles_per_lane_hour": 800.0,
+    "minimum_vehicles_per_lane": 10.0,
+    "reserve_fraction": 0.0,
+    "vehicles_per_lane_hour_by_type": {
+      "highway.motorway": 1800.0,
+      "highway.trunk": 1600.0,
+      "highway.primary": 1400.0,
+      "highway.secondary": 1200.0,
+      "highway.tertiary": 1000.0,
+      "highway.tertiary_link": 900.0,
+      "highway.secondary_link": 900.0,
+      "highway.primary_link": 900.0,
+      "highway.residential": 700.0,
+      "highway.unclassified": 650.0,
+      "highway.service": 300.0,
+      "highway.living_street": 400.0,
+      "highway.footway": 0.0,
+      "highway.steps": 0.0
+    }
+  },
+  "mip": {
+    "unmet_penalty_per_unit": 1000000000.0,
+    "fleet_tiebreak_per_vehicle": 0.000001,
+    "time_limit_seconds": 120.0,
+    "relative_gap": 0.0
+  },
+  "output_dir": "reports"
+}

@@ -1,11 +1,7 @@
-/* Assiut emergency dispatch - minimal map (requirement 1).
- *
- * Shows ONLY the real SUMO road network and the hospitals at their real
- * coordinates.  Clicking the map sets the ambulance start; the search button
- * asks the server for the fastest suitable hospital and draws its route.
- *
- * خريطة الإرسال: تعرض شبكة الطرق الحقيقية والمستشفيات بإحداثياتها فقط،
- * والنقر يحدد نقطة انطلاق الإسعاف ثم يُرسم المسار الأسرع.
+/* Assiut Emergency Dispatch dashboard.
+ * Keeps the existing /api/dispatch contract and animates a marker along
+ * the exact geometry returned by the route algorithm. Animation is a visual
+ * simulation, not live GPS tracking.
  */
 (function () {
   "use strict";
@@ -19,62 +15,45 @@
     preferCanvas: true
   });
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
-    subdomains: "abcd",
-    maxZoom: 19
-  }).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors",
+  maxZoom: 19
+}).addTo(map);
 
   var bounds = L.latLngBounds(NET.bounds || [[27.17, 31.16], [27.205, 31.205]]);
   map.fitBounds(bounds.pad(0.03));
 
-  /* The real road network: every edge polyline, nothing else. */
   if (NET.roads && NET.roads.length) {
     L.polyline(NET.roads, {
-      color: "#31506b",
-      weight: 1.6,
-      opacity: 0.85,
-      interactive: false
+      color: "#34536d", weight: 1.5, opacity: 0.78, interactive: false
     }).addTo(map);
   }
 
   var hospitalLayer = L.layerGroup().addTo(map);
   var startLayer = L.layerGroup().addTo(map);
   var routeLayer = L.layerGroup().addTo(map);
+  var animationFrame = null;
+  var animationMarker = null;
+  var routeLine = null;
+  var origin = null;
 
-  /**
-   * Escape text before inserting it into a popup.
-   * تأمين النص قبل إدراجه في النافذة المنبثقة.
-   */
   function esc(value) {
     return String(value == null ? "" : value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  /* Hospitals: real coordinates only. */
   (HOSP.hospitals || []).forEach(function (h) {
     if (typeof h.lat !== "number" || typeof h.lon !== "number") return;
     var marker = L.circleMarker([h.lat, h.lon], {
-      radius: 5.5,
-      color: "#2a0d0d",
-      weight: 1,
-      fillColor: "#e74c3c",
-      fillOpacity: 0.95
+      radius: 5.5, color: "#39151d", weight: 1.2,
+      fillColor: "#ff5c67", fillOpacity: 0.98
     });
-    marker.bindPopup(
-      "<b>" + esc(h.display_name) + "</b><br>" +
-      h.lat.toFixed(6) + ", " + h.lon.toFixed(6)
-    );
+    marker.bindPopup("<b>" + esc(h.display_name) + "</b><br>" +
+      h.lat.toFixed(6) + ", " + h.lon.toFixed(6));
     marker.bindTooltip(esc(h.display_name), { direction: "top", offset: [0, -6] });
     marker.addTo(hospitalLayer);
   });
-
-  var startMarker = null;
-  var routeLine = null;
-  var origin = null;
 
   var els = {
     specialty: document.getElementById("specialty"),
@@ -87,105 +66,178 @@
     name: document.getElementById("r-name"),
     zone: document.getElementById("r-zone"),
     time: document.getElementById("r-time"),
+    distance: document.getElementById("r-distance"),
     meta: document.getElementById("r-meta"),
     route: document.getElementById("r-route"),
     badge: document.getElementById("data-badge")
   };
 
-  /**
-   * Put the ambulance start marker at a coordinate and mirror it in the inputs.
-   * تعيين نقطة انطلاق الإسعاف وعرض إحداثياتها في الحقول.
-   */
+  function setStatus(message, isError) {
+    els.status.textContent = message;
+    els.status.className = isError ? "error" : "";
+  }
+
+  function stopAnimation() {
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+    if (animationMarker) {
+      routeLayer.removeLayer(animationMarker);
+      animationMarker = null;
+    }
+  }
+
+  function clearRoute() {
+    stopAnimation();
+    routeLayer.clearLayers();
+    routeLine = null;
+  }
+
+  function ambulanceIcon() {
+    return L.divIcon({
+      className: "",
+      html: '<div class="ambulance-icon" aria-label="Simulated ambulance">🚑</div>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 17]
+    });
+  }
+
   function setOrigin(lat, lon) {
     origin = { lat: lat, lon: lon };
     els.lat.value = lat.toFixed(6);
     els.lon.value = lon.toFixed(6);
     startLayer.clearLayers();
-    startMarker = L.circleMarker([lat, lon], {
-      radius: 8,
-      color: "#ffffff",
-      weight: 2,
-      fillColor: "#2f80ed",
-      fillOpacity: 1
-    }).addTo(startLayer);
-    startMarker.bindTooltip("ambulance start", { direction: "top", offset: [0, -8] });
-    setStatus("Start set. Choose a specialty and press the button.");
+    L.circleMarker([lat, lon], {
+      radius: 7, color: "#eafaff", weight: 2,
+      fillColor: "#4bdcff", fillOpacity: 1
+    }).bindTooltip("Ambulance origin", { direction: "top", offset: [0, -8] })
+      .addTo(startLayer);
+    setStatus("Origin set. Choose a specialty and find the fastest hospital.");
   }
 
-  /**
-   * Show a status line (and style it as an error when needed).
-   * عرض رسالة الحالة وتلوينها عند الخطأ.
-   */
-  function setStatus(text, isError) {
-    els.status.textContent = text;
-    els.status.className = isError ? "error" : "";
+  /* Linear interpolation over the returned route geometry.
+     geometry is expected to be an array of [latitude, longitude] points. */
+  function animateAlongRoute(geometry) {
+    stopAnimation();
+    if (!Array.isArray(geometry) || geometry.length < 2) return;
+
+    var points = geometry.map(function (p) {
+      return L.latLng(Number(p[0]), Number(p[1]));
+    }).filter(function (p) {
+      return Number.isFinite(p.lat) && Number.isFinite(p.lng);
+    });
+    if (points.length < 2) return;
+
+    var cumulative = [0];
+    var total = 0;
+    for (var i = 1; i < points.length; i++) {
+      total += map.distance(points[i - 1], points[i]);
+      cumulative.push(total);
+    }
+    if (!total) return;
+
+    animationMarker = L.marker(points[0], {
+      icon: ambulanceIcon(), interactive: true, zIndexOffset: 1200
+    }).bindTooltip("Ambulance route simulation", { direction: "top", offset: [0, -16] })
+      .addTo(routeLayer);
+
+    var duration = Math.max(7000, Math.min(18000, total * 18));
+    var startTime = null;
+
+    function step(timestamp) {
+      if (startTime === null) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var targetDistance = total * progress;
+      var segment = 1;
+
+      while (segment < cumulative.length - 1 && cumulative[segment] < targetDistance) {
+        segment++;
+      }
+
+      var before = cumulative[segment - 1];
+      var span = cumulative[segment] - before;
+      var fraction = span > 0 ? (targetDistance - before) / span : 0;
+      var a = points[segment - 1];
+      var b = points[segment];
+      var position = L.latLng(
+        a.lat + (b.lat - a.lat) * fraction,
+        a.lng + (b.lng - a.lng) * fraction
+      );
+      animationMarker.setLatLng(position);
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(step);
+      } else {
+        animationFrame = null;
+        setStatus("Route calculated. Ambulance route animation completed.");
+      }
+    }
+    animationFrame = requestAnimationFrame(step);
   }
 
-  /**
-   * Draw the returned route and present the optimal hospital.
-   * رسم المسار الأمثل وعرض اسم المستشفى والزمن المتوقع.
-   */
   function showResult(data) {
     els.result.style.display = "block";
-    if (!data.optimal || !data.optimal.route) {
-      els.name.textContent = "No suitable hospital";
-      els.zone.textContent = "Searched only the start zone: " + (data.search_zone || "-");
-      els.time.textContent = "-";
+    var optimal = data && data.optimal;
+    if (!optimal || !optimal.route) {
+      els.name.textContent = "No suitable hospital found";
+      els.zone.textContent = "Search scope: start zone " + (data.search_zone || "-");
+      els.time.textContent = "—";
+      els.distance.textContent = "—";
       els.meta.textContent = "";
       els.route.textContent = "";
       return;
     }
-    var optimal = data.optimal;
-    els.name.textContent = optimal.hospital;
-    els.zone.textContent =
-      "Start zone " + (data.search_zone || optimal.zone) +
-      " - hospital in " + optimal.zone;
-    els.time.textContent = optimal.seconds.toFixed(1);
-    els.meta.textContent =
-      Math.round(optimal.route.length_m) + " m - " +
-      optimal.route.edges.length + " road edges - " +
-      "search " + data.runtime_seconds.toFixed(3) + " s";
-    els.route.textContent = optimal.route.edges.join(" > ");
 
-    routeLayer.clearLayers();
+    els.name.textContent = optimal.hospital || "Selected hospital";
+    els.zone.textContent = "Start zone " + (data.search_zone || optimal.zone || "-") +
+      " · Hospital zone " + (optimal.zone || "-");
+    els.time.textContent = Number(optimal.seconds || 0).toFixed(1);
+    els.distance.textContent = Math.round(Number(optimal.route.length_m || 0)).toLocaleString();
+    els.meta.textContent = (optimal.route.edges || []).length + " road edges · Search completed in " +
+      Number(data.runtime_seconds || 0).toFixed(3) + " s";
+    els.route.textContent = "Route edges: " + ((optimal.route.edges || []).join(" → ") || "Not provided");
+
+    clearRoute();
     var geometry = optimal.route.geometry || [];
     if (geometry.length > 1) {
       routeLine = L.polyline(geometry, {
-        color: "#ff4d4f",
-        weight: 5,
-        opacity: 0.95,
-        lineJoin: "round"
+        color: "#ff5c67", weight: 5, opacity: 0.95,
+        lineJoin: "round", lineCap: "round"
       }).addTo(routeLayer);
-      map.fitBounds(routeLine.getBounds().pad(0.25));
+      L.polyline(geometry, {
+        color: "#ffd4d8", weight: 1.2, opacity: 0.9,
+        dashArray: "3 9", interactive: false
+      }).addTo(routeLayer);
+      map.fitBounds(routeLine.getBounds().pad(0.25), { maxZoom: 16 });
+      animateAlongRoute(geometry);
+      setStatus("Fastest route calculated. Showing simulated ambulance movement.");
+    } else {
+      setStatus("Hospital selected, but the API returned no route geometry.", true);
     }
   }
 
-  /**
-   * Ask the server for the fastest suitable hospital from the current start.
-   * طلب أسرع مستشفى مناسب من الخادم انطلاقاً من النقطة الحالية.
-   */
   function runSearch() {
     var lat = parseFloat(els.lat.value);
     var lon = parseFloat(els.lon.value);
-    if (!isFinite(lat) || !isFinite(lon)) {
-      setStatus("Set the start first (click the map or type lat/lon).", true);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      setStatus("Set the ambulance origin first (click the map or enter latitude/longitude).", true);
       return;
     }
     if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       setStatus("Latitude/longitude are out of range.", true);
       return;
     }
+
     origin = { lat: lat, lon: lon };
-    routeLayer.clearLayers();
+    clearRoute();
     els.result.style.display = "none";
     startLayer.clearLayers();
     L.circleMarker([lat, lon], {
-      radius: 8,
-      color: "#ffffff",
-      weight: 2,
-      fillColor: "#2f80ed",
-      fillOpacity: 1
-    }).addTo(startLayer);
+      radius: 7, color: "#eafaff", weight: 2,
+      fillColor: "#4bdcff", fillOpacity: 1
+    }).bindTooltip("Ambulance origin", { direction: "top", offset: [0, -8] })
+      .addTo(startLayer);
 
     var specialty = els.specialty.value || "general";
     var url = "/api/dispatch?lat=" + encodeURIComponent(lat) +
@@ -193,7 +245,7 @@
       "&specialty=" + encodeURIComponent(specialty);
 
     els.search.disabled = true;
-    setStatus("Searching only the zone containing the start point...");
+    setStatus("Searching the start zone for the fastest suitable hospital...");
     fetch(url)
       .then(function (response) {
         return response.json().then(function (body) {
@@ -201,10 +253,7 @@
         });
       })
       .then(function (outcome) {
-        if (!outcome.ok) {
-          throw new Error(outcome.body.error || "dispatch request failed");
-        }
-        setStatus("Done.");
+        if (!outcome.ok) throw new Error(outcome.body.error || "Dispatch request failed.");
         showResult(outcome.body);
       })
       .catch(function (error) {
@@ -223,36 +272,44 @@
   els.clear.addEventListener("click", function () {
     origin = null;
     startLayer.clearLayers();
-    routeLayer.clearLayers();
+    clearRoute();
     els.result.style.display = "none";
     els.status.className = "";
     els.status.textContent = "Click the map to set the ambulance start.";
   });
 
-  /* Metadata: specialty list + honest provenance of the capacity data. */
   fetch("/api/dispatch/meta")
-    .then(function (response) { return response.json(); })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Metadata request failed.");
+      return response.json();
+    })
     .then(function (meta) {
       (meta.specialties || []).forEach(function (specialty) {
         var option = document.createElement("option");
         option.value = specialty;
-        option.textContent = specialty;
+        option.textContent = specialty.replace(/_/g, " ").replace(/\b\w/g, function (c) {
+          return c.toUpperCase();
+        });
         els.specialty.appendChild(option);
       });
-      var messages = [];
-      if (meta.synthetic) messages.push("SYNTHETIC emergency data");
-      if (String(meta.search_scope || "") === "start_zone_only") {
-        messages.push("start-zone-only search");
+      if (!els.specialty.options.length) {
+        var fallback = document.createElement("option");
+        fallback.value = "general";
+        fallback.textContent = "General";
+        els.specialty.appendChild(fallback);
       }
+      var messages = [];
+      if (meta.synthetic) messages.push("SYNTHETIC EMERGENCY DATA");
+      if (String(meta.search_scope || "") === "start_zone_only") messages.push("START-ZONE-ONLY SEARCH");
       if (messages.length) {
-        els.badge.textContent = messages.join(" - ");
-        els.badge.style.display = "inline-block";
+        els.badge.textContent = "⚠ " + messages.join(" · ");
+        els.badge.style.display = "inline-flex";
       }
       if (meta.config_errors && meta.config_errors.length) {
         setStatus("Configuration error: " + meta.config_errors[0], true);
       }
     })
     .catch(function () {
-      setStatus("Could not load dispatch metadata.", true);
+      setStatus("Could not load dispatch metadata. Check that the server is running.", true);
     });
 })();

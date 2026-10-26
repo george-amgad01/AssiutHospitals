@@ -16,6 +16,8 @@ dead ends, so that nobody has to walk them again.
 * Final dispatch stage: **start-zone-only search, four owner-approved zones,
   seven compared algorithms, 39/39 validation checks, 0 algorithm-comparison
   failures**
+* Final OR stage: **one-day kit/patient plan, lane capacities, 48-ambulance
+  fleet, 136/136 OR validation checks**
 * Removed by owner decision: old dashboard, live stream, traffic-light display,
   hub/dashed lines, UI filters and the 48 periodic ambulance flows
 * Requirement 5 is resolved as **free-flow only**; no congestion code is active
@@ -26,7 +28,7 @@ dead ends, so that nobody has to walk them again.
 > original map and the first dispatch prototype were built. Several details in
 > those sections (48 flows, the live stream, the old dashboard, the old
 > all-zone search and the placeholder zones) were later removed or replaced by
-> the owner decisions. **Part III at the end of this document is the
+> the owner decisions. **Parts III and IV at the end of this document are the
 > authoritative final state.**
 
 ---
@@ -75,6 +77,10 @@ dead ends, so that nobody has to walk them again.
 40. [Phase 26 — final verification](#40-phase-26--final-verification)
 41. [Phase 27 — final bug and issue log](#41-phase-27--final-bug-and-issue-log)
 42. [Phase 28 — final state and limitations](#42-phase-28--final-state-and-limitations)
+43. [Part IV — capacity-constrained operations research](#43-part-iv--capacity-constrained-operations-research)
+44. [Phase 29 — OR model, data, and implementation](#44-phase-29--or-model-data-and-implementation)
+45. [Phase 30 — OR results and verification](#45-phase-30--or-results-and-verification)
+46. [Phase 31 — OR limitations and final state](#46-phase-31--or-limitations-and-final-state)
 
 ---
 
@@ -2251,17 +2257,17 @@ and runs the specialties `general`, `trauma`, `cardiac`, `pediatric`. Each row
 records wall-clock runtime, route time, route length, edge count, optimality and
 verification.
 
-Latest run (2026-10-23, 16 cases):
+Latest run (2026-10-27, 16 cases):
 
 | Algorithm | Runs | Mean runtime (ms) | Mean route time (s) | Optimal | Verified | Failures |
 |---|---:|---:|---:|---:|---:|---:|
-| Dijkstra | 16 | 26.371 | 16.587 | 12 | 16 | 0 |
-| A* | 16 | 10.816 | 16.587 | 12 | 16 | 0 |
-| Bellman-Ford | 16 | 258.482 | 16.587 | 12 | 16 | 0 |
-| VAM | 16 | 26.417 | 16.587 | 12 | 16 | 0 |
-| Least-cost | 16 | 26.396 | 16.587 | 12 | 16 | 0 |
-| North-west corner | 16 | 26.386 | 24.999 | 8 | 16 | 0 |
-| MODI | 16 | 26.406 | 16.587 | 12 | 16 | 0 |
+| Dijkstra | 16 | 23.340 | 16.587 | 12 | 16 | 0 |
+| A* | 16 | 10.757 | 16.587 | 12 | 16 | 0 |
+| Bellman-Ford | 16 | 273.468 | 16.587 | 12 | 16 | 0 |
+| VAM | 16 | 23.392 | 16.587 | 12 | 16 | 0 |
+| Least-cost | 16 | 23.366 | 16.587 | 12 | 16 | 0 |
+| North-west corner | 16 | 23.349 | 24.999 | 8 | 16 | 0 |
+| MODI | 16 | 23.374 | 16.587 | 12 | 16 | 0 |
 
 The four non-optimal cases per pathfinder/optimising method are the four cases
 with no suitable hospital in the zone; those methods correctly returned no
@@ -2419,3 +2425,336 @@ are in section 28.
 * No simulation study was built; only options were reported.
 * The comparison runtime is machine-dependent and should be re-measured on the
   target machine rather than quoted as a constant.
+
+---
+
+## 43. Part IV - capacity-constrained operations research
+
+Part IV is additive to the dispatch project. It does not replace the dispatcher,
+the zones, or the synthetic emergency-capacity policy. Its purpose is to answer a
+different question: **how should a one-day supply of medical kits and a set of
+patient transfers be distributed across the same four Assiut zones while
+respecting the real lane network, prohibited lanes, lane capacities, receiving
+beds, and the 48-ambulance fleet?**
+
+The complete mathematical definition, notation, units, variables, constraints
+and objective are in [`OR_MODEL.md`](OR_MODEL.md). The implementation follows
+that document; no quantity that OSM/SUMO does not publish is presented as real.
+The dispatch layer and the OR layer remain separate.
+
+The owner-approved manual zone assignment is reused without change:
+`11/3/3/9` facilities. One facility in Z1 is the non-routable map-only way, so
+the OR layer has **10 routable Z1 hospitals**, plus 3 in Z2, 3 in Z3 and 9 in Z4:
+**25 routable hospitals**.
+
+---
+
+## 44. Phase 29 - OR model, data, and implementation
+
+### 44.1 Why the tableau and the network model are separate
+
+NWC, least-cost, VAM and MODI are transportation-tableau methods. They operate on
+a cost matrix with row supplies and column demands. They do not know that two
+different source/zone pairs share a lane, that a lane is prohibited for an
+ambulance, or that the fleet has only 48 vehicles.
+
+A single MODI tableau therefore cannot honestly claim to be the optimal plan for
+the physical road network. The implementation keeps two explicit layers:
+
+1. **Kit-only transportation tableau** (`or_transport.py`, `or_modi.py`):
+   NWC, least-cost, VAM, MODI, forbidden cells, labelled dummy row/column,
+   allocation caps, and an independent exact MILP for the same tableau.
+2. **Lane-capacitated network MILP** (`or_network.py`): concrete lane routes,
+   integer kit trips, patient transfers, fleet assignment, unmet variables, and
+   `background + ambulance <= capacity` on every used lane.
+
+The report prints both objectives and states that they are not comparable:
+the tableau is in **kit-metres**, while the network objective is
+**vehicle-metres**.
+
+### 44.2 Sets, units and fixed facts
+
+* **Hospitals:** 25 routable facilities from the existing dataset.
+* **Zones:** four owner-approved manual zones.
+* **Ambulances:** 48, with one conservative trip per vehicle per day.
+* **Kits:** indivisible medical kits; one active trip carries
+  `kits_per_trip = 10`.
+* **Beds:** free emergency beds at receiving hospitals; receiving capacity,
+  never a shipped resource.
+* **Roads:** lane-level directed graph from the real SUMO network, with real
+  lengths and connections. Prohibited lanes are removed before search.
+* **Background flow:** a separate lane-load term; the shipped value is zero
+  because the repository has no measured lane-level traffic.
+
+The model does not assume equal demand or equal hospital counts. The zone
+summaries are deliberately unequal:
+
+| zone | routable hospitals | active sources | patient destinations | kit supply | kit demand | patient demand | usable free beds |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Z1 | 10 | 6 | 6 | 60 | 50 | 6 | 29 |
+| Z2 | 3 | 3 | 3 | 40 | 40 | 4 | 15 |
+| Z3 | 3 | 1 | 3 | 10 | 40 | 4 | 14 |
+| Z4 | 9 | 7 | 7 | 70 | 40 | 4 | 31 |
+| **total** | **25** | **17** | **19** | **180** | **170** | **18** | **89** |
+
+### 44.3 Data provenance and capacity estimate
+
+The following are **SYNTHETIC TEST DATA**, not measurements:
+
+* kit supply at each hospital;
+* zone kit demand;
+* zone patient-transfer demand;
+* background lane flow (zero);
+* road capacity, which is a documented `SYNTHETIC_ESTIMATE` derived from lane
+  count and road type, not from a field survey.
+
+The file `data/or_test_data.json` carries the warning, units and synthetic
+choices. `config/or_planning.json` carries the fleet size, kit quantity,
+capacity estimate, explicit prohibited lanes, and MIP settings. The two files
+can be replaced without changing the solver code.
+
+The zone anchors are real hospital locations, chosen by the implementation and
+documented in the data file: `el-hayah-hospital` (Z1),
+`al-mabara-hospital` (Z2), `al-rowad` (Z3), and `el-salam-hospital` (Z4).
+Every anchor is on the main strongly connected lane component.
+
+### 44.4 Routing and prohibited lanes
+
+`or_router.py` builds a state graph over the class-aware lane graph. A route
+point is a literal point on a source lane, so the search accounts for the
+remaining part of the source lane rather than pretending the vehicle starts at
+the lane's downstream end. It implements:
+
+* Dijkstra;
+* A* with an admissible straight-line distance heuristic;
+* Bellman-Ford as the independent reference.
+
+All three use the same restrictions and distance model. Lanes without
+`emergency` permission and explicit closures are removed from the graph, never
+represented by a finite penalty. The current shipped network has **387
+vehicle-class prohibited lanes** and **0 explicit closures**; the OR report
+records the rule and the counts.
+
+The route matrices contain one row/cell for each active source to each zone
+anchor and each zone anchor to each receiving hospital. A pair with no route is
+**unavailable**, not silently assigned a huge cost. The current matrices have
+68/68 kit cells and 76/76 patient cells available.
+
+### 44.5 Transportation methods and exact checks
+
+`or_transport.py` builds the kit-only table and balances it:
+
+* original supply = 180 kits;
+* original demand = 170 kits;
+* surplus = 10 kits, represented by a labelled
+  `DUMMY_UNUSED_SUPPLY` column;
+* no unmet demand in the shipped case, because the dummy is surplus.
+
+NWC, least-cost and VAM are implemented with a complete, deterministic trace.
+The trace records, at each step, the row/column penalties, the selected line,
+the selected cell, the allocated quantity, the struck row/column, and the
+allocation matrix. A cell whose row supply or column demand is exhausted is not
+selectable; this was a real bug found and fixed during implementation.
+
+MODI starts from the VAM allocation, builds an independent spanning basis, adds
+zero basic cells when the solution is degenerate, computes `u` and `v` from
+basic cells, computes reduced costs for non-basic cells, finds the unique
+stepping-stone cycle, and pivots until no negative reduced cost remains. Forbidden
+cells remain outside the basis and outside the entering candidates. The report
+contains every potential table, reduced-cost table, cycle, theta, leaving cell,
+allocation and final objective.
+
+A separate exact integer MILP (`solve_transport_exact`) checks the final tableau
+objective. It does not enforce road capacities; that is the network model's job.
+
+### 44.6 Network MILP
+
+`or_network.py` builds one integer variable per candidate source/zone or
+zone/hospital route, plus:
+
+* ambulance variables per zone;
+* explicit unmet-kit and unmet-patient variables;
+* source supply constraints;
+* zone kit-demand and patient-demand equalities with unmet terms;
+* hospital bed upper bounds;
+* a total fleet limit of 48 and per-zone trip balance;
+* lane-capacity constraints for every lane used by a candidate route.
+
+The objective is total vehicle-metres plus a tiny fleet tie-break plus a large
+penalty for unmet demand. A selected route's quantity is the number of trips
+(kits) or transfers (patients); the lane coefficient counts every traversal,
+so a route that uses a lane twice contributes twice. Background flow is added
+separately.
+
+After the solve, the planner recomputes lane loads from the selected flows and
+checks supply, demand, beds, fleet, zone balance, road capacity, prohibited
+lanes, continuity, integrality and demand satisfaction. The independent
+verifier repeats this outside the solver.
+
+The candidate path per source/zone or zone/hospital pair is the Dijkstra
+shortest route. The MILP chooses flows over those candidate paths; it does not
+search all possible paths or dynamically reroute around congestion. This
+limitation is stated in the report.
+
+### 44.7 CLI and report commands
+
+The commands are additive:
+
+```powershell
+& $py run.py or-plan
+& $py run.py or-check
+& $py tools\verify_or.py
+```
+
+`or-plan` writes the Markdown report, full JSON plan, CSV tables/traces and an
+SVG route sketch. `--no-write` suppresses files, `--out-dir` changes the output
+directory, `--json` prints the machine-readable summary in addition to the text,
+and `--no-routing-comparison` skips the Dijkstra/A*/Bellman-Ford example
+comparison. `or-check` solves the model and prints the independent constraints
+without writing files.
+
+---
+
+## 45. Phase 30 - OR results and verification
+
+### 45.1 Latest plan
+
+The latest reproducible run (machine-dependent timings) produced:
+
+| item | result |
+|---|---:|
+| routable hospitals / zones | 25 / 4 |
+| active kit sources | 17 |
+| kit supply / demand | 180 / 170 |
+| unused kit supply / unmet kit demand | 10 / 0 |
+| patient transfers / usable free beds | 18 / 89 |
+| NWC objective | 266,837.658 kit-metres |
+| least-cost objective | 107,473.758 kit-metres |
+| VAM initial objective `Z0` | 92,553.958 kit-metres |
+| MODI final objective | 92,553.958 kit-metres, status `optimal` |
+| exact tableau MILP | 92,553.958 kit-metres |
+| network MILP status | `optimal`, solver success |
+| unmet kits / unmet patients | 0 / 0 |
+| vehicles used / fleet | 35 / 48 |
+| kit vehicle-metres | 9,255.396 |
+| patient vehicle-metres | 633.315 |
+| total network objective | 9,888.711 vehicle-metres |
+| active lane loads | 538 |
+| lane loads above capacity | 0 |
+
+The network fleet allocation is `Z1=11, Z2=8, Z3=8, Z4=8`. It uses 35 of the
+48 available vehicles; the remaining 13 are unused capacity, not a violation.
+The network plan contains 16 kit flows and 5 patient flows, together moving all
+18 patient transfers and all 170 demanded kits.
+
+### 45.2 Why VAM/MODI and the network number differ
+
+The VAM/MODI objective is `92,553.958` **kit-metres**: the kit quantity
+multiplied by the distance of each kit-only cell. The network objective is
+`9,888.711` **vehicle-metres**: each trip or transfer is one vehicle movement,
+so a 10-kit trip counts once in the network objective but contributes 10 kit
+units in the tableau. They are different units and different models. The exact
+tableau MILP also matches `92,553.958`, which validates the tableau algorithms
+against an independent solver, not the road-capacitated network.
+
+### 45.3 Routing comparison
+
+The report compares Dijkstra, A* and Bellman-Ford on four representative
+anchor/source pairs. All three returned the same shortest distance on each
+pair; the distance spread was zero. The measured search times are recorded but
+are not presented as fixed performance claims because they vary by machine and
+run.
+
+### 45.4 OR verification
+
+`python tools\verify_or.py` is independent of the production solve. It
+recomputes the routing matrices with Bellman-Ford, replays the VAM trace,
+rebuilds the MODI basis and reduced costs, replays every MODI cycle and theta,
+recomputes network lane loads, and tests small tableaux against exhaustive
+enumeration and an exact MILP.
+
+The latest run reported:
+
+```
+checks : 136
+passed : 136
+failed : 0
+RESULT: PASS
+```
+
+The verifier also exercises:
+
+* forbidden cells, binding cell caps and unbalanced dummy rows/columns;
+* a fully forbidden tableau that must be reported infeasible;
+* an explicit patient shortage that must be labelled
+  `optimal-with-unmet-demand`, not hidden as a physical-constraint failure;
+* a small 3x3 exhaustive instance with true optimum `72.0`, matched by MODI and
+  the exact MILP;
+* network fleet, bed, lane-capacity, prohibition, continuity and integrality
+  checks.
+
+Unit conversion, route continuity, prohibited lanes, demand conservation and
+the 48-vehicle cap are checked both inside the model and independently after
+the solve.
+
+### 45.5 Current warnings
+
+The plan has zero errors and five warnings. All five are hospitals with free
+beds that cannot be patient destinations under the current policy:
+
+* `antar-ent-clinic` and `osm-node-10883658615`: clinics, and
+  `clinics_as_emergency = false`;
+* `asyout-hospital-for-mental-health`, `el-fayrouz-hospital` and
+  `el-salama-hospital`: their receiving lanes cannot be reached from the main
+  network.
+
+These are reported, not hidden or converted into fake capacity. The two
+clinics and the three unreachable dead ends are therefore not used as OR
+receiving destinations.
+
+---
+
+## 46. Phase 31 - OR limitations and final state
+
+### Final OR state
+
+* 25 routable hospitals and four owner-approved manual zones.
+* 48-ambulance fleet; 35 used by the latest plan, total never above 48.
+* 17 active kit sources; 180 kits supplied against 170 kits demanded; 10
+  labelled dummy surplus.
+* 18 patient transfers against 89 usable receiving beds.
+* Kit-only tableau solved by NWC, least-cost, VAM, MODI and an exact MILP.
+* VAM `Z0` = MODI = exact = `92,553.958` kit-metres.
+* Road-capacitated network MILP solved to `optimal` for the stated model.
+* 16 kit flows, 5 patient flows, 538 active lane loads, none above estimated
+  capacity.
+* All 387 class-prohibited lanes removed from search; no selected route uses a
+  prohibited lane.
+* 136/136 independent OR checks pass.
+* Reports are deterministic apart from the UTC timestamp and measured runtimes.
+
+### Limitations that remain by design
+
+* All OR supply, demand, background-flow and road-capacity values are synthetic
+  or estimated. They must be replaced before operational use.
+* The network model uses one shortest candidate route per source/zone or
+  zone/hospital pair. It does not optimise the entire path set or model
+  dynamic traffic.
+* A zone is represented by one anchor; intra-zone delivery points are absent.
+* The fleet is one trip per vehicle per day; shifts, refuelling and multiple
+  trips are not modelled.
+* Fleet zone accounting charges kit trips to the destination zone and patient
+  transfers to the origin zone; empty repositioning and return legs are not
+  modelled.
+* Road costs use snapped lane access points. Entrance/walking offsets are not
+  added, so two facilities that share a snapped point can show zero modelled
+  road distance even when their entrances differ.
+* Standard MODI is not a road-capacitated method. It is reported only for the
+  kit-only tableau.
+* The network MILP's `optimal` status is optimality for the stated integer
+  objective, not a proof of global optimality for every real operational goal.
+* The route sketch is a schematic, not a survey-grade map.
+* No live capacity, call feed, congestion model or SUMO simulation is used.
+
+The OR commands, reports and verifier are additive; the working dispatch
+commands and the existing `D:\Dashboard - Copy\sumo\` assets are unchanged.

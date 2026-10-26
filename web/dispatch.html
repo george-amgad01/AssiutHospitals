@@ -3,139 +3,419 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Assiut &mdash; emergency dispatch</title>
+<title>Assiut Emergency Dispatch</title>
 <link rel="stylesheet" href="vendor/leaflet.css" />
 <style>
   :root {
-    --bg: #0f1419;
-    --panel: #171f27;
-    --line: #2a3744;
-    --text: #dce6ef;
-    --muted: #8fa3b5;
-    --accent: #ff4d4f;
-    --ok: #3ddc97;
+    color-scheme: dark;
+    --bg: #09111c;
+    --panel: rgba(14, 24, 38, .94);
+    --line: rgba(147, 176, 207, .18);
+    --text: #eaf2fb;
+    --muted: #91a7bd;
+    --accent: #ff5c67;
+    --cyan: #4bdcff;
+    --green: #55e6a5;
+    --amber: #ffc46b;
   }
+
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
+
   body {
     background: var(--bg);
     color: var(--text);
-    font: 13px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+    font: 13px/1.5 Inter, "Segoe UI", system-ui, sans-serif;
+    overflow: hidden;
   }
-  #map { position: absolute; inset: 0; background: #0b1015; }
+
+  #map {
+    position: absolute;
+    inset: 0;
+    background: #07101a;
+  }
+
+  .map-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 400;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(5,11,19,.52), transparent 47%),
+      linear-gradient(0deg, rgba(5,11,19,.25), transparent 40%);
+  }
+
+  .topbar {
+    position: absolute;
+    z-index: 700;
+    top: 18px;
+    left: 370px;
+    right: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background: rgba(9,17,28,.84);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.22);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: white;
+    background: linear-gradient(135deg,#ff5967,#c92e4d);
+    font-size: 20px;
+  }
+
+  .brand h1 { margin: 0; font-size: 15px; letter-spacing: .4px; }
+  .brand p { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+
+  .top-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(85,230,165,.1);
+  }
 
   #panel {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    width: 340px;
-    max-height: calc(100% - 32px);
+    z-index: 800;
+    top: 18px;
+    bottom: 18px;
+    left: 18px;
+    width: 330px;
     overflow: auto;
-    background: rgba(23, 31, 39, 0.96);
+    padding: 18px;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 14px 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    z-index: 1000;
+    border-radius: 18px;
+    background: var(--panel);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 55px rgba(0,0,0,.4);
   }
-  h1 { margin: 0 0 2px; font-size: 16px; letter-spacing: 0.2px; }
-  .sub { color: var(--muted); font-size: 11px; margin-bottom: 12px; }
-  label { display: block; color: var(--muted); font-size: 11px; margin: 10px 0 4px; text-transform: uppercase; letter-spacing: 0.6px; }
-  select, input[type="number"] {
+
+  .eyebrow {
+    color: var(--cyan);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+    text-transform: uppercase;
+  }
+
+  .panel-title {
+    margin: 5px 0 3px;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -.5px;
+  }
+
+  .sub {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 5px 9px;
+    border: 1px solid rgba(255,196,107,.25);
+    border-radius: 999px;
+    background: rgba(255,196,107,.08);
+    color: var(--amber);
+    font-size: 9px;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 17px 0 8px;
+    color: #c9d8e7;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+  }
+
+  .section-label .num {
+    display: grid;
+    place-items: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    background: #1a3044;
+    color: var(--cyan);
+  }
+
+  label {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin: 8px 0 5px;
+  }
+
+  select, input[type=number] {
     width: 100%;
-    background: #0f151b;
+    background: #0a1421;
     color: var(--text);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 7px 8px;
+    border-radius: 9px;
+    padding: 10px 11px;
     font: inherit;
     outline: none;
   }
-  select:focus, input[type="number"]:focus { border-color: var(--accent); }
+
+  select:focus, input:focus { border-color: rgba(75,220,255,.7); }
   .row { display: flex; gap: 8px; }
-  .row > div { flex: 1; }
+  .row > div { flex: 1; min-width: 0; }
+
   button {
     width: 100%;
-    margin-top: 12px;
-    padding: 9px 12px;
     border: 0;
-    border-radius: 6px;
-    background: var(--accent);
+    border-radius: 10px;
+    padding: 11px 12px;
+    margin-top: 11px;
+    background: linear-gradient(135deg,#ff6871,#e33c56);
     color: #fff;
     font: inherit;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    font-weight: 800;
     cursor: pointer;
   }
-  button:disabled { opacity: 0.55; cursor: default; }
-  button.secondary { background: #253442; color: var(--text); margin-top: 6px; }
-  #status { margin-top: 12px; color: var(--muted); font-size: 12px; min-height: 18px; }
-  #status.error { color: #ff8b8d; }
-  #result { margin-top: 10px; display: none; border-top: 1px solid var(--line); padding-top: 10px; }
-  #result h2 { margin: 0 0 2px; font-size: 14px; }
-  #result .zone { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
-  #result .time { font-size: 26px; font-weight: 700; color: var(--ok); line-height: 1.1; }
-  #result .time span { font-size: 12px; color: var(--muted); font-weight: 400; }
-  #result .meta { color: var(--muted); font-size: 11px; margin-top: 4px; }
-  #result .route { margin-top: 8px; color: var(--muted); font-size: 10px; word-break: break-all; }
-  .badge {
-    display: inline-block;
-    margin-bottom: 8px;
-    padding: 2px 7px;
-    border-radius: 999px;
-    font-size: 10px;
-    letter-spacing: 0.4px;
-    background: #3a2a12;
-    color: #ffc46b;
-    border: 1px solid #5a421c;
+
+  button:disabled { opacity: .55; cursor: wait; }
+
+  button.secondary {
+    margin-top: 7px;
+    background: #1a2a3c;
+    color: #d7e6f5;
+    box-shadow: none;
+    border: 1px solid var(--line);
   }
-  .legend { margin-top: 12px; color: var(--muted); font-size: 11px; }
-  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
-  .legend .h { background: #e74c3c; }
-  .legend .s { background: #2f80ed; }
-  .legend .r { width: 14px; height: 3px; border-radius: 2px; background: var(--accent); vertical-align: middle; }
+
+  .hint {
+    display: flex;
+    gap: 9px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 10px;
+    background: rgba(255,255,255,.018);
+  }
+
+  .hint-icon { color: var(--cyan); font-size: 15px; }
+
+  #status {
+    margin-top: 12px;
+    min-height: 20px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  #status.error { color: #ff9298; }
+
+  #result {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--line);
+  }
+
+  .result-kicker {
+    color: var(--green);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+  }
+
+  #result h2 { margin: 5px 0 2px; font-size: 17px; }
+  #result .zone { color: var(--muted); font-size: 10px; }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 13px;
+  }
+
+  .metric {
+    padding: 11px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: rgba(255,255,255,.025);
+    min-width: 0;
+  }
+
+  .metric .label {
+    color: var(--muted);
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+
+  .metric .value {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .metric .unit { color: var(--muted); font-size: 10px; font-weight: 500; }
+  #r-time { color: var(--green); }
+  #r-meta { margin-top: 10px; color: var(--muted); font-size: 10px; }
+  #r-route { margin-top: 7px; color: #839ab0; font-size: 9px; overflow-wrap: anywhere; }
+
+  .legend {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+  .dot.h { background: #ff5c67; }
+  .dot.s { background: #4bdcff; }
+  .dot.r { width: 18px; height: 3px; border-radius: 3px; background: #ff5c67; }
+  .dot.a { background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
+
+  .map-chip {
+    position: absolute;
+    z-index: 650;
+    right: 18px;
+    bottom: 18px;
+    padding: 10px 13px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(9,17,28,.88);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .map-chip strong { color: var(--text); }
+
+  .ambulance-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    border: 2px solid white;
+    background: linear-gradient(135deg,#ff6570,#db2848);
+    box-shadow: 0 0 0 5px rgba(255,77,95,.2),0 7px 20px rgba(0,0,0,.45);
+    font-size: 19px;
+  }
+
   .leaflet-container { font: inherit; }
+
+  @media (max-width:760px) {
+    body { overflow: auto; }
+    #panel {
+      top: 12px; left: 12px; right: 12px; bottom: auto;
+      width: auto; max-height: 55vh; padding: 14px;
+    }
+    .topbar { top: auto; bottom: 12px; left: 12px; right: 12px; padding: 10px 12px; }
+    .top-status, .map-chip { display: none; }
+  }
 </style>
 </head>
 <body>
   <div id="map"></div>
+  <div class="map-vignette"></div>
 
-  <div id="panel">
-    <h1>Emergency dispatch</h1>
-    <div class="sub">Nearest suitable hospital by fastest free-flow travel time &mdash; start zone only</div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">✚</div>
+      <div>
+        <h1>ASSIUT EMERGENCY NETWORK</h1>
+        <p>Emergency dispatch &amp; route intelligence</p>
+      </div>
+    </div>
+    <div class="top-status"><span class="pulse"></span><span>DISPATCH SYSTEM READY</span></div>
+  </header>
+
+  <aside id="panel">
+    <div class="eyebrow">Emergency response / Assiut</div>
+    <h2 class="panel-title">Dispatch center</h2>
+    <div class="sub">Find the fastest suitable hospital using the project's road-network algorithm.</div>
     <div id="data-badge" class="badge" style="display:none"></div>
 
+    <div class="section-label"><span class="num">01</span> Patient requirements</div>
     <label for="specialty">Required specialty</label>
     <select id="specialty"></select>
 
-    <label>Ambulance start</label>
+    <div class="section-label"><span class="num">02</span> Ambulance starting point</div>
+    <div class="hint"><span class="hint-icon">⌖</span><span>Click the map to set the ambulance origin, or enter coordinates below.</span></div>
     <div class="row">
-      <div><input id="lat" type="number" step="0.000001" placeholder="latitude" /></div>
-      <div><input id="lon" type="number" step="0.000001" placeholder="longitude" /></div>
+      <div><label for="lat">Latitude</label><input id="lat" type="number" step="0.000001" placeholder="27.18..." /></div>
+      <div><label for="lon">Longitude</label><input id="lon" type="number" step="0.000001" placeholder="31.17..." /></div>
     </div>
-    <button id="search">Find fastest hospital</button>
-    <button id="clear" class="secondary">Clear</button>
 
-    <div id="status">Click the map to set the ambulance start.</div>
-    <div class="legend">
-      Free-flow travel time only; no congestion adjustment. Hospitals outside
-      the routed network are shown on the map but are never selected.
-    </div>
+    <button id="search">✦ &nbsp; Find fastest hospital</button>
+    <button id="clear" class="secondary">Reset map</button>
+    <div id="status" role="status" aria-live="polite">Click the map to set the ambulance start.</div>
 
     <div id="result">
+      <div class="result-kicker">Recommended destination</div>
       <h2 id="r-name"></h2>
       <div id="r-zone" class="zone"></div>
-      <div class="time"><b id="r-time"></b> <span>seconds (expected)</span></div>
-      <div id="r-meta" class="meta"></div>
-      <div id="r-route" class="route"></div>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="label">Estimated travel</div>
+          <div class="value"><span id="r-time">—</span> <span class="unit">sec</span></div>
+        </div>
+        <div class="metric">
+          <div class="label">Route distance</div>
+          <div class="value"><span id="r-distance">—</span> <span class="unit">m</span></div>
+        </div>
+      </div>
+      <div id="r-meta"></div>
+      <div id="r-route"></div>
     </div>
 
     <div class="legend">
-      <div><i class="h"></i>hospital (real coordinates)</div>
-      <div><i class="s"></i>ambulance start</div>
-      <div><i class="r"></i>fastest route</div>
+      <div class="legend-item"><span class="dot h"></span> Hospital location</div>
+      <div class="legend-item"><span class="dot s"></span> Ambulance origin</div>
+      <div class="legend-item"><span class="dot r"></span> Computed fastest route</div>
+      <div class="legend-item"><span class="dot a"></span> Animated ambulance (simulation)</div>
     </div>
-  </div>
+
+    <div class="sub" style="margin:14px 0 0">
+      Free-flow travel estimates only; live traffic and live GPS tracking are not implied.
+    </div>
+  </aside>
+
+  <div class="map-chip"><strong>ASSIUT · GIS VIEW</strong><br/>Project road network and hospital coordinates</div>
 
   <script src="vendor/leaflet.js"></script>
   <script src="network.js"></script>
